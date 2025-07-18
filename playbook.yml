@@ -1,0 +1,7 @@
+- name: Configurar Server Nginx con WordPress
+  hosts: all
+  become: true
+
+  roles:
+    - role: nginx_wordpress
+    - role: geerlingguy.mysql
