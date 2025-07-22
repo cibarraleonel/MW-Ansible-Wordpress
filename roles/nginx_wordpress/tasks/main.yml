@@ -1,3 +1,96 @@
-#SPDX-License-Identifier: MIT-0
 ---
-# tasks file for roles/nginx_wordpress
+- name: Mostrar distribución y familia del sistema operativo
+  debug:
+    msg: "Instalando en {{ ansible_distribution }} ({{ ansible_os_family }})"
+
+- name: Actualizar caché de apt
+  apt:
+    update_cache: yes
+  when: ansible_os_family == "Debian"
+  become: true
+
+- name: Instalar nginx
+  package:
+    name: "{{ nginx_package }}"
+    state: present
+  become: true
+
+- name: Instalar PHP y extensiones necesarias
+  package:
+    name: "{{ php_packages }}"
+    state: present
+    update_cache: true
+  become: true
+
+# - name: Instalar MySQL Server
+#   package:
+#     name: "{{ mysql_package }}"
+#     state: present
+#   become: true
+
+- name: Quitar sitio por defecto (nginx)
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  when: ansible_os_family == "Debian"
+  become: true
+
+- name: Crear archivo de configuración nginx para WordPress
+  template:
+    src: wordpress.conf.j2
+    dest: /etc/nginx/conf.d/wordpress.conf
+  become: true
+
+- name: Crear directorio web
+  file:
+    path: /var/www/html
+    state: directory
+    owner: "{{ web_user }}"
+    group: "{{ web_user }}"
+    mode: '0755'
+  become: true
+
+- name: Descargar WordPress
+  get_url:
+    url: "https://wordpress.org/wordpress-{{ wordpress_version }}.tar.gz"
+    dest: /tmp/wordpress.tar.gz
+  become: true
+
+- name: Descomprimir WordPress
+  unarchive:
+    src: /tmp/wordpress.tar.gz
+    dest: /var/www/html/
+    remote_src: yes
+    creates: /var/www/html/wordpress
+  become: true
+
+- name: Dar permisos al directorio de WordPress
+  file:
+    path: /var/www/html/wordpress
+    state: directory
+    recurse: yes
+    owner: "{{ web_user }}"
+    group: "{{ web_user }}"
+  become: true
+
+- name: Crear wp-config.php desde plantilla
+  template:
+    src: wp-config.php.j2
+    dest: /var/www/html/wordpress/wp-config.php
+    owner: "{{ web_user }}"
+    group: "{{ web_user }}"
+    mode: '0644'
+  become: true
+
+- name: Reiniciar nginx
+  service:
+    name: nginx
+    state: restarted
+  become: true
+
+- name: Habilitar y arrancar php-fpm
+  service:
+    name: "{{ php_fpm_service }}"
+    state: started
+    enabled: true
+  become: true
