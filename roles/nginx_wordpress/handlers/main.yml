@@ -1,3 +1,12 @@
-#SPDX-License-Identifier: MIT-0
 ---
-# handlers file for roles/nginx_wordpress
+- name: Reiniciar nginx
+  service:
+    name: nginx
+    state: restarted
+  become: true
+
+- name: Reiniciar php
+  service:
+    name: "{{ php_fpm_service }}"
+    state: restarted
+  become: true
