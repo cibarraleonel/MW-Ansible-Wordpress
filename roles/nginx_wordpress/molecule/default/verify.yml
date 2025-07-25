@@ -1,0 +1,90 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Verificar que nginx está instalado
+      package_facts:
+        manager: apt
+
+    - name: Confirmar que nginx está instalado
+      assert:
+        that:
+          - "'nginx' in ansible_facts.packages"
+        fail_msg: "nginx no está instalado"
+        success_msg: "nginx está correctamente instalado"
+
+    - name: Verificar que php-fpm está instalado
+      assert:
+        that:
+          - "'php-fpm' in ansible_facts.packages"
+        fail_msg: "php-fpm no está instalado"
+        success_msg: "php-fpm está correctamente instalado"
+
+    - name: Verificar que el servicio nginx está ejecutándose
+      service_facts:
+
+    - name: Confirmar que nginx está ejecutándose
+      assert:
+        that:
+          - "ansible_facts.services['nginx.service'].state == 'running'"
+        fail_msg: "nginx no está ejecutándose"
+        success_msg: "nginx está ejecutándose correctamente"
+
+    - name: Verificar que php-fpm está ejecutándose
+      assert:
+        that:
+          - "ansible_facts.services['php8.1-fpm.service'].state == 'running'"
+        fail_msg: "php-fpm no está ejecutándose"
+        success_msg: "php-fpm está ejecutándose correctamente"
+
+    - name: Verificar que el directorio de WordPress existe
+      stat:
+        path: /var/www/html/wordpress
+      register: wordpress_dir
+
+    - name: Confirmar que WordPress está instalado
+      assert:
+        that:
+          - wordpress_dir.stat.exists
+          - wordpress_dir.stat.isdir
+        fail_msg: "El directorio de WordPress no existe"
+        success_msg: "WordPress está correctamente instalado"
+
+    - name: Verificar que el archivo wp-config.php existe
+      stat:
+        path: /var/www/html/wordpress/wp-config.php
+      register: wp_config
+
+    - name: Confirmar que wp-config.php existe
+      assert:
+        that:
+          - wp_config.stat.exists
+        fail_msg: "wp-config.php no existe"
+        success_msg: "wp-config.php está correctamente configurado"
+
+    - name: Verificar que el archivo de configuración de nginx para WordPress existe
+      stat:
+        path: /etc/nginx/conf.d/wordpress.conf
+      register: nginx_config
+
+    - name: Confirmar que la configuración de nginx para WordPress existe
+      assert:
+        that:
+          - nginx_config.stat.exists
+        fail_msg: "La configuración de nginx para WordPress no existe"
+        success_msg: "La configuración de nginx para WordPress está correctamente configurada"
+
+    - name: Verificar que nginx responde en el puerto 80
+      uri:
+        url: http://localhost
+        method: GET
+        status_code: [200, 301, 302, 403]
+      register: nginx_response
+
+    - name: Confirmar que nginx está respondiendo
+      assert:
+        that:
+          - nginx_response.status in [200, 301, 302, 403]
+        fail_msg: "nginx no está respondiendo correctamente"
+        success_msg: "nginx está respondiendo correctamente"
