@@ -8,7 +8,12 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = ">=3.11"
-ansible = ">=11.0.0,<11.1.0"
+ansible = ">=11.0.0,<12.0.0"
+molecule = "<25.0"
+molecule-docker = "*"
+
+[tool.poetry.group.dev.dependencies]
+ansible-lint = "^25.7.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
