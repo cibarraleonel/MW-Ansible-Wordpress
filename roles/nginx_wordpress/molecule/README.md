@@ -1,11 +1,5 @@
 # Testing con Molecule
 
-Este directorio contiene las pruebas automatizadas para el rol `nginx_wordpress` usando Docker.
-
-## ¿Qué es Molecule?
-
-Molecule es una herramienta que nos ayuda a probar nuestros roles de Ansible de forma automática. Crea contenedores Docker temporales, ejecuta nuestro rol y verifica que todo funcione correctamente.
-
 ## Archivos importantes
 
 - `molecule.yml` - Configuración de los contenedores de prueba
