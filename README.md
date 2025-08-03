@@ -6,8 +6,7 @@ Automatización del despliegue de una instalación básica de WordPress con NGIN
 
 - [asdf]
 - [Poetry]
-- [Vagrant]
-- [VirtualBox]
+- [Docker]
 
 ---
 
@@ -37,39 +36,37 @@ Automatización del despliegue de una instalación básica de WordPress con NGIN
 
 
 
-## Despliegue de máquinas virtuales
+## Testing con Molecule
 
-El archivo `Vagrantfile` define 3 VMs con boxes diferentes:
+El proyecto incluye testing automatizado usando Molecule con Docker:
 
-| VM       | Box               | IP             | S.O. Base | PHP     |
-|----------|-------------------|----------------|-----------|---------|
-| Ubuntu   | ubuntu/jammy64    | 192.168.56.101 | Ubuntu 22 | 8.1     |
-| Debian   | debian/bookworm64 | 192.168.56.102 | Debian 12 | 8.2     |
-| Rocky    | generic/rocky9    | 192.168.56.103 | Rocky 9   | 8.0     |
-
-### Levantar las VMs y ejecutar playbook
+### Ejecutar tests
 
 ```bash
-vagrant up
+# Instalar dependencias
+poetry install
+
+# Ejecutar todas las pruebas
+poetry run molecule test
+
+# Solo crear el contenedor de prueba
+poetry run molecule create
+
+# Solo ejecutar el rol
+poetry run molecule converge
+
+# Solo verificar que funciona
+poetry run molecule verify
+
+# Limpiar contenedores
+poetry run molecule destroy
 ```
 
-> Esto levantará las 3 VMs y ejecutará el playbook directamente desde el `Vagrantfile`.
+### Configuración de testing
 
-O, para ejecutar manualmente:
-
-```bash
-vagrant up ubuntu
-```
-> Luego se debe provionar las VMs usando el `inventory.ini`. Para provisionar las 3 VMs:
-
-```bash
-poetry run ansible-playbook -i inventory.ini playbook.yml
-```
-Y si lo queremos hacer con una especifica:
-
-```bash
-poetry run ansible-playbook -i inventory.ini playbook.yml --limit ubuntu
-```
+- **Plataforma**: Ubuntu 22.04 (Docker)
+- **Driver**: Docker
+- **Verificaciones**: Nginx, PHP-FPM, WordPress
 
 ---
 
@@ -77,8 +74,6 @@ poetry run ansible-playbook -i inventory.ini playbook.yml --limit ubuntu
 
 ```
 MW-Ansible-Wordpress/
-├── Vagrantfile
-├── inventory.ini
 ├── playbook.yml
 ├── group_vars/
 │   ├── all.yml
@@ -92,7 +87,17 @@ MW-Ansible-Wordpress/
 │   │   ├── templates/
 │   │   │   ├── wordpress.conf.j2
 │   │   │   └── wp-config.php.j2
-│   │   └── handlers/
+│   │   ├── handlers/
+│   │   │   └── main.yml
+│   │   ├── molecule/
+│   │   │   ├── default/
+│   │   │   │   ├── molecule.yml
+│   │   │   │   ├── converge.yml
+│   │   │   │   ├── verify.yml
+│   │   │   │   ├── requirements.yml
+│   │   │   │   └── ansible.cfg
+│   │   │   └── README.md
+│   │   └── meta/
 │   │       └── main.yml
 |   └── galaxy/
 │       └── geerlingguy.mysql/
@@ -117,8 +122,14 @@ MW-Ansible-Wordpress/
 
 ## 🌐 Acceso a WordPress
 
-Desde tu navegador:
+Para acceder a WordPress después de ejecutar el rol, necesitarás configurar el acceso según tu entorno de despliegue.
 
-- [http://192.168.56.101](http://192.168.56.101) – Ubuntu
-- [http://192.168.56.102](http://192.168.56.102) – Debian
-- [http://192.168.56.103](http://192.168.56.103) – Rocky
+## 🧪 Testing
+
+El proyecto incluye testing automatizado con Molecule que verifica:
+
+- ✅ Instalación de Nginx
+- ✅ Instalación de PHP-FPM
+- ✅ Descarga de WordPress
+- ✅ Configuración de permisos
+- ✅ Verificación de servicios
