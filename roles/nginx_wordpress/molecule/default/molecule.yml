@@ -35,4 +35,4 @@ provisioner:
         ansible_user: root
 
 verifier:
-  name: ansible 
+  name: ansible

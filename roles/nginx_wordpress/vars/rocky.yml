@@ -1,3 +1,4 @@
+---
 php_version: "8.0"
 nginx_package: nginx
 php_packages:

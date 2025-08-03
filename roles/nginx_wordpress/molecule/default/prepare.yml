@@ -8,20 +8,20 @@
   tasks:
     # Actualizar caché de paquetes
     - name: Update apt cache
-      apt:
-        update_cache: yes
+      ansible.builtin.apt:
+        update_cache: true
       when: ansible_os_family == "Debian"
 
     # Instalar Python3 (necesario para Ansible)
     - name: Install Python3
-      package:
+      ansible.builtin.package:
         name: python3
         state: present
       when: ansible_os_family == "Debian"
 
     # Instalar certificados SSL (necesario para descargas HTTPS)
     - name: Install CA certificates
-      package:
+      ansible.builtin.package:
         name: ca-certificates
         state: present
-      when: ansible_os_family == "Debian" 
+      when: ansible_os_family == "Debian"
