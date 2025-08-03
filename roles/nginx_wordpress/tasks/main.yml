@@ -1,46 +1,56 @@
 ---
+# Tareas para instalar y configurar WordPress con Nginx y PHP
+# Nota: Muchas tareas requieren permisos de root (become: true)
+
+- name: Incluir variables específicas del sistema operativo
+  include_vars: "{{ ansible_distribution | lower }}.yml"
+  when: ansible_distribution | lower in ['ubuntu', 'debian', 'rocky']
+
 - name: Mostrar distribución y familia del sistema operativo
   debug:
     msg: "Instalando en {{ ansible_distribution }} ({{ ansible_os_family }})"
 
+
+
+# Actualizar caché de paquetes (solo en sistemas Debian/Ubuntu)
 - name: Actualizar caché de apt
   apt:
     update_cache: yes
   when: ansible_os_family == "Debian"
-  
+  become: true  # Necesario para actualizar caché del sistema
 
+# Instalar Nginx
 - name: Instalar nginx
   package:
     name: "{{ nginx_package }}"
     state: present
-  
+  become: true  # Necesario para instalar paquetes del sistema
 
+# Instalar PHP y extensiones necesarias
 - name: Instalar PHP y extensiones necesarias
   package:
     name: "{{ php_packages }}"
     state: present
     update_cache: true
-  
+  become: true  # Necesario para instalar paquetes del sistema
 
-# - name: Instalar MySQL Server
-#   package:
-#     name: "{{ mysql_package }}"
-#     state: present
-#   
-
+# Eliminar sitio por defecto de Nginx (solo en sistemas Debian/Ubuntu)
 - name: Quitar sitio por defecto (nginx)
   file:
     path: /etc/nginx/sites-enabled/default
     state: absent
   when: ansible_os_family == "Debian"
-  
+  become: true  # Necesario para modificar archivos del sistema
 
+# Crear configuración de Nginx para WordPress
 - name: Crear archivo de configuración nginx para WordPress
   template:
     src: wordpress.conf.j2
     dest: /etc/nginx/conf.d/wordpress.conf
-  
+  become: true  # Necesario para escribir en /etc/nginx/
+  notify: restart nginx
 
+# Crear directorio web con permisos correctos
 - name: Crear directorio web
   file:
     path: /var/www/html
@@ -48,31 +58,36 @@
     owner: "{{ web_user }}"
     group: "{{ web_user }}"
     mode: '0755'
-  
+  become: true  # Necesario para crear directorios del sistema
 
+# Descargar WordPress (no necesita become porque es solo descarga)
 - name: Descargar WordPress
   get_url:
     url: "https://wordpress.org/wordpress-{{ wordpress_version }}.tar.gz"
     dest: /tmp/wordpress.tar.gz
-  
+  # No necesita become: true porque solo descarga un archivo
 
+# Descomprimir WordPress en el directorio web
 - name: Descomprimir WordPress
   unarchive:
     src: /tmp/wordpress.tar.gz
     dest: /var/www/html/
     remote_src: yes
     creates: /var/www/html/wordpress
-  
+  become: true  # Necesario para escribir en /var/www/html/
 
+# Configurar permisos correctos para WordPress
 - name: Dar permisos al directorio de WordPress
   file:
     path: /var/www/html/wordpress
     state: directory
-    recurse: yes
+    recurse: no
     owner: "{{ web_user }}"
     group: "{{ web_user }}"
-  
+    mode: '0755'
+  become: true  # Necesario para cambiar permisos del sistema
 
+# Crear archivo de configuración de WordPress
 - name: Crear wp-config.php desde plantilla
   template:
     src: wp-config.php.j2
@@ -80,17 +95,21 @@
     owner: "{{ web_user }}"
     group: "{{ web_user }}"
     mode: '0644'
-  
+  become: true  # Necesario para escribir en directorio del sistema
+  notify: restart nginx
 
-- name: Reiniciar nginx
-  service:
-    name: nginx
-    state: restarted
-  
+# Reiniciar Nginx para aplicar cambios
+#- name: Reiniciar nginx
+#  service:
+#    name: nginx
+#    state: restarted
+#  become: true  # Necesario para reiniciar servicios del sistema
 
+# Habilitar y arrancar PHP-FPM
 - name: Habilitar y arrancar php-fpm
   service:
     name: "{{ php_fpm_service }}"
     state: started
     enabled: true
+  become: true  # Necesario para gestionar servicios del sistema
   
