@@ -1,0 +1,6 @@
+---
+# Dependencias del rol para Docker
+roles:
+  - name: geerlingguy.mysql
+    src: geerlingguy.mysql
+    version: 3.3.0 
