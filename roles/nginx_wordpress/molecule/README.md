@@ -46,3 +46,28 @@ poetry run molecule destroy
 
 - Docker instalado y funcionando
 - Poetry con las dependencias instaladas 
+
+# Ansible Lint - Guía Básica
+
+`ansible-lint` es una herramienta que ayuda a detectar y corregir problemas comunes en playbooks, roles y tareas de Ansible.
+
+## 🎯 Finalidad
+
+- Mejorar la calidad del código Ansible.
+- Detectar errores de sintaxis, estilo y convenciones.
+- Aplicar buenas prácticas recomendadas.
+
+## 🛠️ Instalación
+
+Si usás `poetry`, asegurate de tenerlo en el `pyproject.toml`:
+
+```bash
+# ayadirlo si no se hace por dependencia
+poetry add --group=dev ansible-lint
+
+# correr el linter
+poetry run ansible-lint roles/nginx_wordpress/
+
+# corregir errores basicos automaticamente
+poetry run ansible-lint --fix roles/nginx_wordpress/
+```

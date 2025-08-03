@@ -45,8 +45,9 @@
   ansible.builtin.template:
     src: wordpress.conf.j2
     dest: /etc/nginx/conf.d/wordpress.conf
+    mode: "0744"
   become: true # Necesario para escribir en /etc/nginx/
-  notify: restart nginx
+  notify: Restart nginx
 
 # Crear directorio web con permisos correctos
 - name: Crear directorio web
@@ -63,6 +64,7 @@
   ansible.builtin.get_url:
     url: "https://wordpress.org/wordpress-{{ wordpress_version }}.tar.gz"
     dest: /tmp/wordpress.tar.gz
+    mode: "0644"
 # No necesita become: true porque solo descarga un archivo
 
 # Descomprimir WordPress en el directorio web
@@ -94,7 +96,7 @@
     group: "{{ web_user }}"
     mode: "0644"
   become: true # Necesario para escribir en directorio del sistema
-  notify: restart nginx
+  notify: Restart nginx
 
 # Habilitar y arrancar PHP-FPM
 - name: Habilitar y arrancar php-fpm

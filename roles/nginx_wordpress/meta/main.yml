@@ -1,5 +1,4 @@
 ---
-#SPDX-License-Identifier: MIT-0
 galaxy_info:
   author: Leo Ibarra
   description: Role para instalar y configurar WordPress con Nginx y PHP

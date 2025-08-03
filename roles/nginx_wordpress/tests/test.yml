@@ -1,6 +1,6 @@
-#SPDX-License-Identifier: MIT-0
 ---
-- hosts: localhost
+- name: Test nginx_wordpress role
+  hosts: localhost
   remote_user: root
   roles:
-    - roles/nginx_wordpress
+    - nginx_wordpress
