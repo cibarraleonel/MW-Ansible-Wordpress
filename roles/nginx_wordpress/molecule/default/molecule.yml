@@ -1,0 +1,38 @@
+---
+# Configuración de Molecule para testing con Docker
+# Escenario por defecto para probar el rol nginx_wordpress
+
+dependency:
+  name: galaxy
+
+driver:
+  name: docker
+
+platforms:
+  # Contenedor Ubuntu 22.04 para testing
+  - name: ubuntu
+    image: ubuntu:22.04
+    pre_build_image: false
+    command: sleep infinity
+    environment:
+      container: docker
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    privileged: true
+    dockerfile: Dockerfile
+
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      ansible_python_interpreter: /usr/bin/python3
+      host_key_checking: false
+      retry_files_enabled: false
+  inventory:
+    group_vars:
+      all:
+        ansible_user: root
+
+verifier:
+  name: ansible 
