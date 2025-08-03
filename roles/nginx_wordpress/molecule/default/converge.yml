@@ -1,0 +1,11 @@
+---
+# Playbook de convergencia para Docker
+# Ejecuta nuestro rol nginx_wordpress
+
+- name: Converge
+  hosts: all
+  become: true
+  tasks:
+    - name: Include nginx_wordpress role
+      include_role:
+        name: nginx_wordpress 
