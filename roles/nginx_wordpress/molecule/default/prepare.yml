@@ -1,0 +1,27 @@
+---
+# Playbook de preparación para Docker
+# Instala dependencias necesarias antes de ejecutar el rol
+
+- name: Prepare
+  hosts: all
+  become: true
+  tasks:
+    # Actualizar caché de paquetes
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    # Instalar Python3 (necesario para Ansible)
+    - name: Install Python3
+      package:
+        name: python3
+        state: present
+      when: ansible_os_family == "Debian"
+
+    # Instalar certificados SSL (necesario para descargas HTTPS)
+    - name: Install CA certificates
+      package:
+        name: ca-certificates
+        state: present
+      when: ansible_os_family == "Debian" 
