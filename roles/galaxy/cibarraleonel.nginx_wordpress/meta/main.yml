@@ -1,0 +1,23 @@
+---
+galaxy_info:
+  role_name: nginx_wordpress
+  author: cibarraleonel
+  description: Rol Ansible para instalar WordPress con Nginx y PHP
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Ubuntu
+      versions: ["22.04"]
+    - name: Debian
+      versions: ["12"]
+    - name: EL
+      versions: ["9"]
+
+  galaxy_tags:
+    - wordpress
+    - nginx
+    - php
+    - web
+    - lamp
+
+dependencies: []

@@ -1,0 +1,42 @@
+---
+# Playbook de verificación para Docker
+# Verifica que nuestro rol funcionó correctamente
+
+- name: Verify
+  hosts: all
+  become: true
+  vars_files:
+    - ../../vars/ubuntu.yml
+  tasks:
+    # Verificar que nginx está instalado
+    - name: Verify nginx is installed
+      ansible.builtin.stat:
+        path: /usr/sbin/nginx
+      register: nginx_bin
+
+    # Verificar que PHP está instalado
+    - name: Verify PHP is installed
+      ansible.builtin.stat:
+        path: /usr/bin/php
+      register: php_bin
+
+    # Verificar que WordPress está descargado
+    - name: Verify WordPress directory exists
+      ansible.builtin.stat:
+        path: /var/www/html/wordpress
+      register: wordpress_dir
+
+    # Verificar que wp-config.php existe
+    - name: Verify wp-config.php exists
+      ansible.builtin.stat:
+        path: /var/www/html/wordpress/wp-config.php
+      register: wp_config_file
+
+    # Mostrar resultados
+    - name: Display verification results
+      ansible.builtin.debug:
+        msg:
+          - "✅ Nginx Installed: {{ nginx_bin.stat.exists }}"
+          - "✅ PHP Installed: {{ php_bin.stat.exists }}"
+          - "✅ WordPress Directory: {{ wordpress_dir.stat.exists }}"
+          - "✅ WP Config File: {{ wp_config_file.stat.exists }}"

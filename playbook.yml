@@ -3,5 +3,10 @@
   become: true
 
   roles:
-    - role: nginx_wordpress
+    - role: cibarraleonel.nginx_wordpress
     - role: geerlingguy.mysql
+  
+  vars:
+    mysql_replication_role: ''
+    mysql_replication_master: ''
+    ansible_skip_mysql_replication_check: true

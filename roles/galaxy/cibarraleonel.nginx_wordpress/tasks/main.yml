@@ -1,0 +1,107 @@
+---
+# Tareas para instalar y configurar WordPress con Nginx y PHP
+# Nota: Muchas tareas requieren permisos de root (become: true)
+
+- name: Incluir variables específicas del sistema operativo
+  ansible.builtin.include_vars: "{{ ansible_distribution | lower }}.yml"
+  when: ansible_distribution | lower in ['ubuntu', 'debian', 'rocky']
+
+- name: Mostrar distribución y familia del sistema operativo
+  ansible.builtin.debug:
+    msg: "Instalando en {{ ansible_distribution }} ({{ ansible_os_family }})"
+
+# Actualizar caché de paquetes (solo en sistemas Debian/Ubuntu)
+- name: Actualizar caché de apt
+  ansible.builtin.apt:
+    update_cache: true
+  when: ansible_os_family == "Debian"
+  become: true # Necesario para actualizar caché del sistema
+
+# Instalar Nginx
+- name: Instalar nginx
+  ansible.builtin.package:
+    name: "{{ nginx_package }}"
+    state: present
+  become: true # Necesario para instalar paquetes del sistema
+
+# Instalar PHP y extensiones necesarias
+- name: Instalar PHP y extensiones necesarias
+  ansible.builtin.package:
+    name: "{{ php_packages }}"
+    state: present
+    update_cache: true
+  become: true # Necesario para instalar paquetes del sistema
+
+# Eliminar sitio por defecto de Nginx (solo en sistemas Debian/Ubuntu)
+- name: Quitar sitio por defecto (nginx)
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  when: ansible_os_family == "Debian"
+  become: true # Necesario para modificar archivos del sistema
+
+# Crear configuración de Nginx para WordPress
+- name: Crear archivo de configuración nginx para WordPress
+  ansible.builtin.template:
+    src: wordpress.conf.j2
+    dest: /etc/nginx/conf.d/wordpress.conf
+    mode: "0744"
+  become: true # Necesario para escribir en /etc/nginx/
+  notify: Restart nginx
+
+# Crear directorio web con permisos correctos
+- name: Crear directorio web
+  ansible.builtin.file:
+    path: /var/www/html
+    state: directory
+    owner: "{{ web_user }}"
+    group: "{{ web_user }}"
+    mode: "0755"
+  become: true # Necesario para crear directorios del sistema
+
+# Descargar WordPress (no necesita become porque es solo descarga)
+- name: Descargar WordPress
+  ansible.builtin.get_url:
+    url: "https://wordpress.org/wordpress-{{ wordpress_version }}.tar.gz"
+    dest: /tmp/wordpress.tar.gz
+    mode: "0644"
+# No necesita become: true porque solo descarga un archivo
+
+# Descomprimir WordPress en el directorio web
+- name: Descomprimir WordPress
+  ansible.builtin.unarchive:
+    src: /tmp/wordpress.tar.gz
+    dest: /var/www/html/
+    remote_src: true
+    creates: /var/www/html/wordpress
+  become: true # Necesario para escribir en /var/www/html/
+
+# Configurar permisos correctos para WordPress
+- name: Dar permisos al directorio de WordPress
+  ansible.builtin.file:
+    path: /var/www/html/wordpress
+    state: directory
+    recurse: false
+    owner: "{{ web_user }}"
+    group: "{{ web_user }}"
+    mode: "0755"
+  become: true # Necesario para cambiar permisos del sistema
+
+# Crear archivo de configuración de WordPress
+- name: Crear wp-config.php desde plantilla
+  ansible.builtin.template:
+    src: wp-config.php.j2
+    dest: /var/www/html/wordpress/wp-config.php
+    owner: "{{ web_user }}"
+    group: "{{ web_user }}"
+    mode: "0644"
+  become: true # Necesario para escribir en directorio del sistema
+  notify: Restart nginx
+
+# Habilitar y arrancar PHP-FPM
+- name: Habilitar y arrancar php-fpm
+  ansible.builtin.service:
+    name: "{{ php_fpm_service }}"
+    state: started
+    enabled: true
+  become: true # Necesario para gestionar servicios del sistema

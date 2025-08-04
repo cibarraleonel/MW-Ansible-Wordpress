@@ -1,0 +1,15 @@
+---
+php_version: "8.1"
+
+php_packages:
+  - php{{ php_version }}
+  - php{{ php_version }}-fpm
+  - php{{ php_version }}-mysql
+
+nginx_package: nginx
+mysql_package: mysql-server
+
+web_user: www-data
+
+php_fpm_service: php{{ php_version }}-fpm
+php_fpm_socket: "/run/php/php{{ php_version }}-fpm.sock"

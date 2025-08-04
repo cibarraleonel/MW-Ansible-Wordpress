@@ -1,0 +1,11 @@
+---
+php_version: "8.0"
+nginx_package: nginx
+php_packages:
+  - php
+  - php-fpm
+  - php-mysqlnd
+mysql_package: mysql-server
+web_user: nginx
+php_fpm_service: php-fpm
+php_fpm_socket: "/run/php-fpm/www.sock"

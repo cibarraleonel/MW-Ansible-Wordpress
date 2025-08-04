@@ -16,3 +16,7 @@ mysql_users:
     host: localhost
     password: secret123
     priv: "wordpress.*:ALL"
+
+# Desactivar replicación
+mysql_replication_role: ''
+mysql_replication_master: ''
