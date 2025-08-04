@@ -5,10 +5,8 @@
 - name: Converge
   hosts: all
   become: true
-  tasks:
-    - name: Include nginx_wordpress role
-      ansible.builtin.include_role:
-        name: nginx_wordpress
+  roles:
+    - role: ../../..
   vars:
     mysql_databases:
       - name: wordpress

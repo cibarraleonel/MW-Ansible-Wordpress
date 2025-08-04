@@ -1,38 +1,43 @@
-Role Name
-=========
+# Ansible Role: nginx_wordpress
 
-A brief description of the role goes here.
+Este rol instala y configura WordPress utilizando Nginx y PHP-FPM en sistemas Linux compatibles. Está diseñado para funcionar tanto con bases de datos locales como remotas (por ejemplo, AWS RDS).
 
-Requirements
-------------
+---
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+## ¿Qué hace este rol?
 
-Role Variables
---------------
+- Instala y configura Nginx.
+- Instala PHP y las extensiones necesarias.
+- Descarga y despliega WordPress.
+- Crea el archivo `wp-config.php` con la configuración de base de datos.
+- Prepara todo para que WordPress quede funcional con PHP-FPM.
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+---
 
-Dependencies
-------------
+## Requisitos del entorno
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+- Ansible ≥ 11.0
+- Python ≥ 3.11 en el host de control
+- Docker (solo si usás Molecule para testing)
+- Acceso root (`become: true`)
+- Compatible con: **Ubuntu**, **Debian** y **Rocky Linux**
 
-Example Playbook
-----------------
+---
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+## Variables requeridas
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+Estas variables deben definirse en tu inventario, `group_vars/all.yml`, o directamente en el playbook:
 
-License
--------
+```yaml
+mysql_databases:
+  - name: wordpress
+    encoding: utf8mb4
+    collation: utf8mb4_general_ci
 
-BSD
+mysql_users:
+  - name: wpuser
+    host: localhost
+    password: secret123
+    priv: "wordpress.*:ALL"
 
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+mysql_root_password: rootpass
