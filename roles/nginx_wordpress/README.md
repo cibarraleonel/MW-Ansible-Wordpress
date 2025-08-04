@@ -1,4 +1,4 @@
-# Ansible Role: nginx_wordpress
+# Ansible Role: nginx_wordpress 
 
 Este rol instala y configura WordPress utilizando Nginx y PHP-FPM en sistemas Linux compatibles. Está diseñado para funcionar tanto con bases de datos locales como remotas (por ejemplo, AWS RDS).
 
